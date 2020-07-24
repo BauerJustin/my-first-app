@@ -1,41 +1,43 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
+import { StyleSheet, View, Button, FlatList } from 'react-native';
+import GoalItem from './components/GoalItem';
+import GoalInput from './components/GoalInput';
 
 export default function App() {
-  const [enteredGoal, setEnteredGoal] = useState('');
+  const [courseGoals, setCourseGoals] = useState([]);
+  const [isAddMode, setIsAddMode] = useState(false);
 
-  const goalInputHandler = (enteredText) => {
-    setEnteredGoal(enteredText);
-  }
+  const addGoalHandler = goalTitle => {
+    setCourseGoals(currentGoals => [...currentGoals, { key: Math.random().toString(), value: goalTitle }]);
+    setIsAddMode(false);
+  };
 
-  const addGoalHandler = () => {
-    console.log(enteredGoal);
+  const removeGoalHandle = goalKey => {
+    setCourseGoals(currentGoals => {
+      return currentGoals.filter((goal) => goal.key !== goalKey);
+    });
+  };
+
+  const cancelGoalAdditionHandler = () => {
+    setIsAddMode(false);
   }
 
   return (
     <View style={styles.screen}>
-      <View style={styles.inputContainer}>
-        <TextInput 
-          placeholder="Course Goal" 
-          style={styles.input} 
-          onChangeText={goalInputHandler}
-          value={enteredGoal}
-        />
-        <Button title="ADD" onPress={addGoalHandler}/>
-      </View>
-      <View />
+      <Button title="Add New Goal" onPress={() => setIsAddMode(true)} />
+      <GoalInput visible={isAddMode} onAddGoal={addGoalHandler} onCancel={cancelGoalAdditionHandler}/>
+      <FlatList 
+        data={courseGoals} 
+        renderItem={itemData => <GoalItem onDelete={removeGoalHandle.bind(this, itemData.item.key)} title={itemData.item.value} />}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
-    padding: 50, justifyContent: 'space-between', alignItems: 'center'
-  },
-  inputContainer: {
-    flexDirection: 'row'
-  },
-  input: {
-    borderBottomColor: 'black', borderBottomWidth: 1, padding: 10, width: 200
+    padding: 50, 
+    justifyContent: 'space-between', 
+    alignItems: 'center'
   },
 });
